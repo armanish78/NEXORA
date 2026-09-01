@@ -1,0 +1,26 @@
+# Python
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated indexes and model artifacts
+model/indexes/
+model/cache/
+model/embeddings/
+
+# Processed document outputs
+data/processed/
+data/cleaned/
+
+# Pytest
+.pytest_cache/
+*.pytest_cache
+
+# Editor
+.vscode/
+.idea/
+*.db
+data/raw/

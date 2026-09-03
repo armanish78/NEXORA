@@ -290,7 +290,9 @@ def ingest_file(file_path: str, force: bool = False) -> list[dict] | None:
     # --------------------------------------------------------
     file_hash = compute_file_hash(file_path)
 
-    if not force and is_already_processed(file_hash):
+    output_path = processed_output_path(filename)
+
+    if not force and is_already_processed(file_hash) and os.path.exists(output_path):
         logger.info(f"Already processed (cached): {filename}")
         return None
 

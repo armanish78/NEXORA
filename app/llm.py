@@ -108,7 +108,7 @@ class LocalHuggingFaceProvider(LLMProvider):
             {"role": "user", "content": prompt}
         ]
         text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        inputs = self.tokenizer([text], return_tensors="pt").to(self.device)
+        inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
         
         do_sample = temperature > 0.01
         

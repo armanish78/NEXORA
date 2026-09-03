@@ -43,7 +43,7 @@ python scripts/run_ingestion.py
 ### Step 3: Run Cleaning
 Raw OCR text often contains garbage characters, headers, and page numbers that confuse the AI.
 ```bash
-python scripts/run_cleaning.py
+python -m scripts.run_cleaning
 ```
 - **What it does:** Reads from `data/processed/`, cleans the text using regex rules, and outputs clean JSON files into `data/cleaned/`.
 

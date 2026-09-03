@@ -18,37 +18,66 @@ class RAGGenerator:
         query: str,
         chunks: List[Dict[str, Any]],
     ) -> str:
-        prompt = (
-            "You are an educational assistant answering questions "
-            "from a provided document.\n\n"
-            "STRICT RULES:\n"
-            "1. Use ONLY information present in the provided context.\n"
-            "2. Text, code, comments, examples, and output shown in "
-            "the context are all valid evidence.\n"
-            "3. If the answer is not contained in the context, "
-            "explicitly state: 'The provided documents do not contain "
-            "sufficient information.'\n"
-            "4. If the context contains the answer, answer the "
-            "question directly. Do NOT refuse.\n"
-            "5. Do not use outside knowledge. Do not invent facts.\n"
-            "6. Do not invent examples.\n"
-            "7. EVERY factual claim in your answer MUST have supporting source citations using the provided Source IDs (e.g., [S1], [S2]).\n"
-            "8. Put the citation immediately after the claim or sentence it supports.\n"
-            "9. Multiple sources may be cited together when appropriate (e.g., [S1][S2]).\n"
-            "10. Use ONLY the supplied source IDs. Do not invent source IDs, and do not cite sources that do not support the claim.\n\n"
-            "=== CONTEXT ===\n"
+        query_lower = query.lower()
+        has_quiz_intent = (
+            ("quiz" in query_lower or "questions" in query_lower) and
+            any(w in query_lower for w in ["create", "generate", "make", "give", "write", "provide"])
         )
+
+        if has_quiz_intent:
+            prompt = (
+                "You are an educational assistant generating a multiple-choice quiz from a provided document.\n\n"
+                "STRICT RULES:\n"
+                "1. Generate the exact number of questions requested by the user. If unspecified, default to 10 questions.\n"
+                "2. EVERY question must have exactly FOUR options: A, B, C, D.\n"
+                "3. Exactly ONE option must be factually correct according to the text.\n"
+                "4. Immediately after the four options for each question, you MUST display: 'Correct answer: X. <correct option text>'\n"
+                "5. Every question and correct answer MUST be supported ONLY by the provided context. Do not invent facts.\n"
+                "6. Do NOT generate useless metadata questions like 'What is the filename?' or 'What page...'. Test actual academic/technical content.\n"
+                "7. If citing sources, use the provided Source IDs (e.g., [S1]). Do not expose internal metadata.\n"
+                "8. If the document does not contain enough information to generate the requested number of questions, generate as many as possible and report the limitation.\n\n"
+                "=== CONTEXT ===\n"
+            )
+        else:
+            prompt = (
+                "You are an educational assistant answering questions "
+                "from a provided document.\n\n"
+                "STRICT RULES:\n"
+                "1. Use ONLY information present in the provided context.\n"
+                "2. Text, code, comments, examples, and output shown in "
+                "the context are all valid evidence.\n"
+                "3. If the answer is not contained in the context, "
+                "explicitly state: 'The provided documents do not contain "
+                "sufficient information.'\n"
+                "4. If the context contains the answer, answer the "
+                "question directly. Do NOT refuse.\n"
+                "5. Do not use outside knowledge. Do not invent facts.\n"
+                "6. Do not invent examples.\n"
+                "7. EVERY factual claim in your answer MUST have supporting source citations using the provided Source IDs (e.g., [S1], [S2]).\n"
+                "8. Put the citation immediately after the claim or sentence it supports.\n"
+                "9. Multiple sources may be cited together when appropriate (e.g., [S1][S2]).\n"
+                "10. Use ONLY the supplied source IDs. Do not invent source IDs, and do not cite sources that do not support the claim.\n\n"
+                "=== CONTEXT ===\n"
+            )
 
         for idx, chunk in enumerate(chunks, start=1):
             prompt += f"[S{idx}]\n"
             prompt += f"Content: {chunk['text']}\n\n"
 
-        prompt += (
-            "=== QUESTION ===\n"
-            f"{query}\n\n"
-            "=== ANSWER ===\n"
-            "Answer directly using the relevant information above."
-        )
+        if has_quiz_intent:
+            prompt += (
+                "=== REQUEST ===\n"
+                f"{query}\n\n"
+                "=== QUIZ ===\n"
+                "Generate the quiz directly using the relevant information above."
+            )
+        else:
+            prompt += (
+                "=== QUESTION ===\n"
+                f"{query}\n\n"
+                "=== ANSWER ===\n"
+                "Answer directly using the relevant information above."
+            )
 
         return prompt
 

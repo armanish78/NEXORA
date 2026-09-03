@@ -14,13 +14,16 @@ model/embeddings/
 # Processed document outputs
 data/processed/
 data/cleaned/
+data/raw/
 
 # Pytest
 .pytest_cache/
 *.pytest_cache
 
-# Editor
+# Logs
+*.log
+
+# Editor & Local
 .vscode/
 .idea/
 *.db
-data/raw/

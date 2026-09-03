@@ -115,6 +115,7 @@ def chunk_text_structural(text: str, chunk_size: int, overlap: int) -> List[Tupl
 def chunk_pages(pages: List[Dict[str, Any]], chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP, minimum_chunk_size=MINIMUM_CHUNK_SIZE) -> List[Dict[str, Any]]:
     """
     Convert cleaned pages into structured chunks across page boundaries.
+    Preserves document structure as metadata (headings, hierarchy).
     """
     if not pages:
         return []
@@ -144,7 +145,10 @@ def chunk_pages(pages: List[Dict[str, Any]], chunk_size=CHUNK_SIZE, overlap=CHUN
     raw_chunks = chunk_text_structural(full_text, chunk_size, overlap)
     
     chunks = []
-    for chunk_text_val, c_start, c_end in raw_chunks:
+    current_heading = None
+    headings_list = []
+    
+    for chunk_idx, (chunk_text_val, c_start, c_end) in enumerate(raw_chunks):
         if len(chunk_text_val) < minimum_chunk_size:
             continue
             
@@ -158,13 +162,39 @@ def chunk_pages(pages: List[Dict[str, Any]], chunk_size=CHUNK_SIZE, overlap=CHUN
             page_field = covered_pages[0]
         else:
             page_field = covered_pages
+
+        # Check for headings in this chunk to update current_heading
+        lines = chunk_text_val.split('\n')
+        for line in lines:
+            if is_heading(line):
+                current_heading = line.strip()
+                if current_heading not in headings_list:
+                    headings_list.append(current_heading)
             
         chunks.append({
             "chunk_id": len(chunks),
             "text": chunk_text_val,
             "page": page_field,
             "source": source,
-            "filename": filename
+            "filename": filename,
+            "heading": current_heading,
+            "is_structural": False
         })
         
+    # Generate small structural index chunks (batching headings into chunks of ~10 headings)
+    if headings_list:
+        batch_size = 10
+        for i in range(0, len(headings_list), batch_size):
+            batch = headings_list[i:i+batch_size]
+            outline_text = f"DOCUMENT STRUCTURE SECTION for {filename} (Overview, Summary, Table of Contents, Chapters, Sections, Parts):\n" + "\n".join(f"- {h}" for h in batch)
+            chunks.append({
+                "chunk_id": len(chunks),
+                "text": outline_text,
+                "page": "Metadata",
+                "source": source,
+                "filename": filename,
+                "heading": "Document Outline",
+                "is_structural": True
+            })
+
     return chunks

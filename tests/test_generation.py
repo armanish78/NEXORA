@@ -10,7 +10,7 @@ class MockProvider(LLMProvider):
     def health_check(self): return True
 
 class MockRetriever:
-    def retrieve(self, query, top_k=5):
+    def retrieve(self, query, top_k=5, filename=None):
         if "moon" in query: return []
         return [
             {"chunk_id": 1, "filename": "doc1.pdf", "page": 1, "text": "Bayes theorem.", "score": 0.99},

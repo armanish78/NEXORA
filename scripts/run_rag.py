@@ -51,6 +51,30 @@ def run_interactive():
         
     t1 = time.perf_counter()
     print(f"Ready. (Startup took {t1-t0:.2f}s)")
+    filenames = sorted(list(set(c.get("filename") for c in faiss.chunks if c.get("filename"))))
+    print("\nAvailable indexed documents:")
+    print("0. All documents (No filter)")
+    for i, fname in enumerate(filenames, 1):
+        print(f"{i}. {fname}")
+        
+    selected_file = None
+    while True:
+        choice = input("\nSelect active document by number (default 0): ").strip()
+        if not choice:
+            break
+        try:
+            idx = int(choice)
+            if idx == 0:
+                break
+            elif 1 <= idx <= len(filenames):
+                selected_file = filenames[idx - 1]
+                break
+        except ValueError:
+            pass
+        print("Invalid choice. Try again.")
+        
+    print(f"\nActive Document Scope: {selected_file if selected_file else 'ALL DOCUMENTS'}")
+
     print("\n" + "="*50)
     print("Ask a question! (Type 'quit', 'exit', or Ctrl+C to exit)")
     print("="*50)
@@ -65,7 +89,7 @@ def run_interactive():
                 continue
                 
             t_start = time.perf_counter()
-            res = generator.generate(q, top_k=5)
+            res = generator.generate(q, top_k=5, filename=selected_file)
             t_end = time.perf_counter()
             
             print(f"\nAnswer:\n{res['answer']}")

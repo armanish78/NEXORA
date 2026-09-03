@@ -22,10 +22,19 @@ Before the AI can answer questions, it has to read your books.
 ## 3. How it searches (The Retrieval Architecture)
 When you ask a question, the system needs to find the right chunk of text from the textbook to answer it.
 
-- **Embeddings:** The system converts every single chunk of text into a mathematical coordinate (a vector) using a local AI model called `all-MiniLM-L6-v2`.
-- **The Database (FAISS):** These coordinates are saved in a highly efficient search database.
-- **Searching:** When you ask a question, your question is also turned into a coordinate. The system finds the textbook chunks that are mathematically closest to your question. 
-- **Context Expansion:** To make sure the AI has enough context, the system not only grabs the matching chunk, but also secretly grabs the chunks that came right before and right after it in the original textbook.
+- **Structural Outline Extraction:** During chunking, the system automatically detects document headings and builds high-level "structural chunks" to understand the layout of your document.
+- **Embeddings (Semantic Search):** The system converts every single chunk of text into a mathematical coordinate (a vector) using a local AI model called `all-MiniLM-L6-v2`.
+- **Lexical Search (BM25):** Alongside vector embeddings, the system uses BM25 to find exact keyword matches (great for specific terminology or names).
+- **The Databases:** Vectors are saved in a highly efficient search database (FAISS), while text is saved in a BM25 index.
+- **Retriever Component (`app/retrieve.py`)**:  
+  Replaces all hard-coded regex retrieval logic with a multi-strategy engine. By combining FAISS semantic embeddings with a persistent BM25 index, candidate chunks are ranked via Reciprocal Rank Fusion (RRF). 
+  Additionally, **Context Assembly** dynamically pulls contiguous sibling chunks sharing the same heading/filename (up to an 8-chunk bidirectional expansion boundary) to recover entire sections.
+  **Structural Resolution** is evidence-aware: when navigation metadata matches a query, the underlying content chunks inherit the outline's relevance score, enabling actual content to outrank navigation menus. To ensure accuracy, the system uses **Structural Normalization** to strip generic framing words (e.g., "compare", "types of") from the query before calculating heading overlap, preventing false positives on generic intent queries.
+  Finally, **Document Scoping** enforces strict `filename` boundaries throughout the API and generation layers to prevent cross-contamination.
+
+- **Interaction & Testing Scripts**:  
+  - `run_project.sh`: The main entry point automating environment setup, data ingestion, indexing, and the interactive terminal chat.
+  - `scripts/run_rag.py`: An interactive command-line interface for human-in-the-loop Q&A against the RAG system.
 
 ---
 
@@ -41,8 +50,8 @@ Once the system finds the right text, it uses a powerful AI called `Qwen2.5-3B-I
 
 - **Answering:** The AI is given your question and the specific textbook chunks, and is strictly ordered to answer using ONLY that text.
 - **Quizzes:** The AI is ordered to write a multiple-choice question. You can choose Easy, Medium, or Hard. Harder questions force the AI to read more chunks at once and create trickier wrong answers.
-- **Citations:** The AI must explicitly state which chunk of text it got its answer from.
-- **Self-Correction:** If the AI makes a formatting mistake, the system automatically catches it, yells at the AI, and makes it rewrite the answer before showing it to you.
+- **Citations & Enforcement:** The AI must explicitly state which chunk of text it got its answer from using `[S#]` tags. If it fails to include valid citations, a **Single-Retry Mechanism** catches it, injects a critical correction prompt, and forces the AI to rewrite the answer. If it fails twice, the system returns a safe failure rather than a hallucinated response.
+- **Dynamic Generation Budget:** The system uses a `max_tokens=768` generation ceiling for answers (increased from 512) to ensure there is enough token budget for complex explanations and their required citations, while short factual queries terminate early automatically.
 
 ---
 

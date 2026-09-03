@@ -42,5 +42,8 @@ def get_personalization_engine() -> PersonalizationEngine:
 def get_answer_evaluator() -> AnswerEvaluator:
     return _answer_evaluator
 
+def get_retriever() -> Retriever:
+    return _retriever
+
 def get_model_name() -> str:
     return LLM_MODEL_DEFAULT

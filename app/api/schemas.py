@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional
 class QAQuery(BaseModel):
     query: str = Field(..., description="The question to ask based on the ingested documents")
     top_k: int = Field(5, description="Number of chunks to retrieve")
+    filename: Optional[str] = Field(None, description="Optional filename to restrict the search scope")
 
 class QAResponse(BaseModel):
     success: bool

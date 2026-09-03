@@ -154,16 +154,28 @@ def main():
         logger.error("No chunks to index.")
         return
         
+    # Make chunk_id globally unique across all documents
+    for i, c in enumerate(global_chunks):
+        c["chunk_id"] = i
+        
     logger.info(f"Building index with {len(global_chunks)} total chunks...")
+    
+    from rank_bm25 import BM25Okapi
+    import re
     
     t0 = time.perf_counter()
     # Extract embeddings and clean chunks
     embeddings_matrix = [c.pop("embedding") for c in global_chunks]
     index = create_index(embeddings_matrix)
+    
+    # Tokenize corpus and build BM25
+    tokenized_corpus = [re.sub(r'[^\w\s]', '', c.get("text", "")).lower().split() for c in global_chunks]
+    bm25_model = BM25Okapi(tokenized_corpus) if tokenized_corpus else None
     t_index_build = time.perf_counter() - t0
     
+    from app.config import BM25_V2_INDEX_PATH
     t0 = time.perf_counter()
-    save_index(index, global_chunks, index_path=FAISS_V2_INDEX_PATH, metadata_path=CHUNKS_V2_METADATA_PATH)
+    save_index(index, global_chunks, bm25_model=bm25_model, index_path=FAISS_V2_INDEX_PATH, metadata_path=CHUNKS_V2_METADATA_PATH, bm25_path=BM25_V2_INDEX_PATH)
     t_index_save = time.perf_counter() - t0
     
     t_total = time.perf_counter() - t_start_total

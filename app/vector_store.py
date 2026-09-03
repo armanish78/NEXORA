@@ -34,9 +34,9 @@ def create_index(embeddings):
     return index
 
 
-def save_index(index, chunks, index_path=INDEX_PATH, metadata_path=METADATA_PATH):
+def save_index(index, chunks, bm25_model=None, index_path=INDEX_PATH, metadata_path=METADATA_PATH, bm25_path=None):
     """
-    Save the FAISS index and chunk metadata to disk.
+    Save the FAISS index, chunk metadata, and BM25 index to disk.
     """
 
     os.makedirs(
@@ -54,11 +54,16 @@ def save_index(index, chunks, index_path=INDEX_PATH, metadata_path=METADATA_PATH
             chunks,
             file
         )
+        
+    if bm25_model is not None and bm25_path is not None:
+        os.makedirs(os.path.dirname(bm25_path), exist_ok=True)
+        with open(bm25_path, "wb") as file:
+            pickle.dump(bm25_model, file)
 
 
-def load_index(index_path=INDEX_PATH, metadata_path=METADATA_PATH):
+def load_index(index_path=INDEX_PATH, metadata_path=METADATA_PATH, bm25_path=None):
     """
-    Load a previously saved FAISS index and its metadata.
+    Load a previously saved FAISS index, its metadata, and optionally the BM25 index.
     """
 
     if not os.path.exists(index_path):
@@ -77,8 +82,13 @@ def load_index(index_path=INDEX_PATH, metadata_path=METADATA_PATH):
 
     with open(metadata_path, "rb") as file:
         chunks = pickle.load(file)
+        
+    bm25_model = None
+    if bm25_path and os.path.exists(bm25_path):
+        with open(bm25_path, "rb") as file:
+            bm25_model = pickle.load(file)
 
-    return index, chunks
+    return index, chunks, bm25_model
 
 
 def search_index(

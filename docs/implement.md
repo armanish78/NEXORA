@@ -52,13 +52,13 @@ The system must cut the cleaned text into "chunks" and embed them into a mathema
 ```bash
 python scripts/run_indexing.py
 ```
-- **What it does:** Reads from `data/cleaned/`, chunks the text (512 characters), embeds them, and saves the search index to `model/indexes/v2/faiss.index`.
+- **What it does:** Reads from `data/cleaned/`, chunks the text (512 characters), builds structural outline chunks, computes embeddings, and builds a BM25 lexical index. It saves the results to `model/indexes/v2/faiss.index`, `model/indexes/v2/chunks.pkl`, and `model/indexes/v2/bm25.pkl`.
 
 ---
 
 ## Phase 3: Interacting with the AI
 
-Once the index is built (Phase 2 is complete), the Core Brain is fully active. You have two ways to use it.
+Once the index is built (Phase 2 is complete), the Core Brain is fully active. You have multiple ways to use it.
 
 ### Option A: The Terminal Chat (Quickest)
 You can chat with the AI directly in your terminal.
@@ -66,6 +66,20 @@ You can chat with the AI directly in your terminal.
 python scripts/run_rag.py
 ```
 - You can ask questions based on your PDFs, or type `quiz` to have it generate a multiple-choice quiz based on your weak topics.
+
+
+## Retrieval Architecture Updates
+- `app/retrieve.py`
+  - Replaces regex parsing with generic multi-strategy retrieval (FAISS + BM25).
+  - Uses Reciprocal Rank Fusion (RRF) to merge candidate pools.
+  - **Context Assembly**: Intelligently expands top chunks by fetching contiguous neighboring chunks that share the same heading and document filename (up to 8 chunks bidirectionally), smoothly assembling full logical sections for the LLM.
+  - **Structural Resolution**: If a structural outline chunk is matched via query terms, the retriever identifies the matched heading. The underlying content chunks then mathematically inherit the outline's structural relevance. This uses **Structural Normalization** to strip generic query intent words (e.g. "compare", "types") so only domain-specific words calculate the heading overlap.
+  - Accepts a generic `filename` filter for **Document Scoping** at the API level and in interactive scripts to prevent cross-document contamination.
+
+## Generation Architecture Updates
+- `app/generator.py`
+  - **Single-Retry Citation Enforcement**: Checks the LLM's raw output for parsed `[S#]` citations. If missing, it automatically injects a correction prompt and retries generation. If it fails twice, a safe failure is returned to the user.
+  - **Dynamic Generation Budget**: Initial generation and retry passes use `max_tokens=768` instead of the default 512, safely permitting long-form explanatory queries while remaining fast for short factual answers.
 
 ### Option B: The Web API (For frontends)
 If you are connecting a mobile app or a frontend web interface, start the FastAPI server:

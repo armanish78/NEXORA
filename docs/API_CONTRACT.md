@@ -72,10 +72,11 @@ Allowed difficulty values are exactly `"easy"`, `"medium"`, and `"hard"`.
 ```json
 {
   "query": "What is generative AI?",
-  "top_k": 5 
+  "top_k": 5,
+  "filename": "textbook.pdf"
 }
 ```
-*Note: `top_k` is optional and defaults to 5.*
+*Note: `top_k` is optional and defaults to 5. `filename` is optional but HIGHLY RECOMMENDED. When `filename` is supplied, retrieval is strictly scoped to that document only.*
 
 **Response (Success 200):**
 ```json

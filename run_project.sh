@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "--- Phase 1: Environment Setup ---"
+echo "--- 2. Environment & Setup ---"
 if [ ! -d ".venv" ]; then
     echo "Creating virtual environment..."
     python3 -m venv .venv
@@ -13,16 +13,17 @@ source .venv/bin/activate
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
-echo "--- Phase 2: Processing Documents ---"
-echo "Running Ingestion (OCR & Text Extraction)..."
+echo "--- 3. Data Pipelines (Ingestion to Indexing) ---"
+echo "Running Ingestion Pipeline..."
 python scripts/run_ingestion.py
 
-echo "Running Cleaning..."
+echo "Running Cleaning Pipeline..."
 python -m scripts.run_cleaning
 
-echo "Running Indexing (Building the Search Database)..."
+echo "Running Chunking & Indexing..."
 python scripts/run_indexing.py
 
-echo "--- Phase 3: Interacting with the AI ---"
+
+echo "--- 5. Interacting with the AI ---"
 echo "Starting Terminal Chat..."
 python scripts/run_rag.py

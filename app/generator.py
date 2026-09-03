@@ -32,8 +32,10 @@ class RAGGenerator:
             "question directly. Do NOT refuse.\n"
             "5. Do not use outside knowledge. Do not invent facts.\n"
             "6. Do not invent examples.\n"
-            "7. Cite supporting information using the provided "
-            "Source IDs such as [S1] or [S2].\n\n"
+            "7. EVERY factual claim in your answer MUST have supporting source citations using the provided Source IDs (e.g., [S1], [S2]).\n"
+            "8. Put the citation immediately after the claim or sentence it supports.\n"
+            "9. Multiple sources may be cited together when appropriate (e.g., [S1][S2]).\n"
+            "10. Use ONLY the supplied source IDs. Do not invent source IDs, and do not cite sources that do not support the claim.\n\n"
             "=== CONTEXT ===\n"
         )
 
@@ -101,11 +103,13 @@ class RAGGenerator:
         self,
         query: str,
         top_k: int = 5,
+        filename: str = None
     ) -> Dict[str, Any]:
 
         chunks = self.retriever.retrieve(
             query=query,
             top_k=top_k,
+            filename=filename
         )
 
         # No retrieved evidence.
@@ -154,7 +158,7 @@ class RAGGenerator:
 
             has_exact_program = any(
                 program_pattern.search(
-                    chunk.get("text", "")
+                    chunk.get("text", "") + "\n" + str(chunk.get("heading", ""))
                 )
                 for chunk in chunks
             )
@@ -163,11 +167,18 @@ class RAGGenerator:
         #
         # Explicit Program queries bypass it ONLY when the exact
         # requested Program heading was retrieved.
-        if (
-            not has_exact_program
-            and chunks[0].get("score", 0)
-            < INITIAL_GROUNDING_THRESHOLD
-        ):
+        max_semantic = max((chunk.get("score", 0.0) for chunk in chunks), default=0.0)
+        max_lexical = max((chunk.get("lexical_score", 0.0) for chunk in chunks), default=0.0)
+        has_structural = any(chunk.get("is_structural", False) for chunk in chunks)
+        
+        is_grounded = False
+        if max_semantic >= INITIAL_GROUNDING_THRESHOLD:
+            is_grounded = True
+        elif has_structural and max_lexical > 0:
+            # If structural metadata was retrieved because of a lexical match
+            is_grounded = True
+            
+        if not is_grounded and not has_exact_program:
             return {
                 "answer": (
                     "The provided documents do not contain "
@@ -185,7 +196,8 @@ class RAGGenerator:
         )
 
         # Generate answer.
-        raw_output = self.llm.generate(prompt)
+        first_raw_output = self.llm.generate(prompt, max_tokens=768)
+        raw_output = first_raw_output
 
         # Convert [S1], [S2], etc. into actual document citations.
         final_answer, used_chunks = self.parse_citations(
@@ -193,9 +205,34 @@ class RAGGenerator:
             chunks,
         )
 
+        is_refusal = "The provided documents do not contain" in raw_output
+        retry_triggered = False
+
+        if not is_refusal and len(used_chunks) == 0:
+            retry_triggered = True
+            retry_prompt = prompt + "\n\nCRITICAL: Your previous response did not include valid source citations. Rewrite the answer using ONLY the provided context. Every factual claim must include the appropriate [S#] source citation immediately after the claim. Use only the provided source IDs. Do not invent source IDs."
+            
+            raw_output = self.llm.generate(retry_prompt, max_tokens=768)
+            final_answer, used_chunks = self.parse_citations(
+                raw_output,
+                chunks,
+            )
+            
+            if len(used_chunks) == 0:
+                return {
+                    "answer": "The generated answer could not be returned because it lacked sufficient source citations.",
+                    "used_chunks": [],
+                    "retrieved_chunks": chunks,
+                    "raw_llm_output": raw_output,
+                    "retry_triggered": retry_triggered,
+                    "first_raw_output": first_raw_output,
+                }
+
         return {
             "answer": final_answer,
             "used_chunks": used_chunks,
             "retrieved_chunks": chunks,
             "raw_llm_output": raw_output,
+            "retry_triggered": retry_triggered,
+            "first_raw_output": first_raw_output,
         }

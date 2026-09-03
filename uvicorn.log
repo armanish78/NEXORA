@@ -1,0 +1,16 @@
+/home/nova/Desktop/RAG/.venv/lib/python3.14/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+INFO:     Started server process [104112]
+INFO:     Waiting for application startup.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights:   0%|          | 1/434 [00:00<04:27,  1.62it/s]Loading weights:  12%|█▏        | 51/434 [00:00<00:04, 94.58it/s]Loading weights:  18%|█▊        | 80/434 [00:00<00:03, 110.54it/s]Loading weights:  24%|██▎       | 102/434 [00:01<00:02, 121.42it/s]Loading weights:  28%|██▊       | 122/434 [00:01<00:02, 136.88it/s]Loading weights:  33%|███▎      | 142/434 [00:01<00:02, 138.57it/s]Loading weights:  37%|███▋      | 160/434 [00:01<00:02, 121.73it/s]Loading weights:  42%|████▏     | 183/434 [00:01<00:01, 131.45it/s]Loading weights:  46%|████▌     | 199/434 [00:01<00:01, 137.28it/s]Loading weights:  50%|████▉     | 215/434 [00:01<00:01, 137.15it/s]Loading weights:  53%|█████▎    | 231/434 [00:02<00:01, 124.24it/s]Loading weights:  56%|█████▋    | 245/434 [00:02<00:01, 107.82it/s]Loading weights:  62%|██████▏   | 267/434 [00:02<00:01, 124.63it/s]Loading weights:  65%|██████▍   | 281/434 [00:02<00:01, 123.75it/s]Loading weights:  70%|██████▉   | 303/434 [00:02<00:01, 128.56it/s]Loading weights:  73%|███████▎  | 317/434 [00:02<00:00, 129.42it/s]Loading weights:  78%|███████▊  | 339/434 [00:02<00:00, 134.99it/s]Loading weights:  82%|████████▏ | 356/434 [00:02<00:00, 143.27it/s]Loading weights:  86%|████████▋ | 375/434 [00:03<00:00, 111.11it/s]Loading weights:  92%|█████████▏| 399/434 [00:03<00:00, 108.74it/s]Loading weights:  95%|█████████▌| 413/434 [00:03<00:00, 113.39it/s]Loading weights: 100%|██████████| 434/434 [00:03<00:00, 118.99it/s]
+Some parameters are on the meta device because they were offloaded to the cpu.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 4487.05it/s]
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:41180 - "POST /questions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41188 - "POST /questions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58338 - "POST /questions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48206 - "POST /questions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54880 - "POST /questions HTTP/1.1" 200 OK

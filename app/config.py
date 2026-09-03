@@ -67,3 +67,4 @@ CHUNKS_METADATA_PATH = os.path.join(V1_INDEX_DIR, "chunks.pkl")
 # V2 Index Paths
 FAISS_V2_INDEX_PATH = os.path.join(V2_INDEX_DIR, "faiss.index")
 CHUNKS_V2_METADATA_PATH = os.path.join(V2_INDEX_DIR, "chunks.pkl")
+BM25_V2_INDEX_PATH = os.path.join(V2_INDEX_DIR, "bm25.pkl")

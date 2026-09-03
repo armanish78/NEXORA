@@ -11,12 +11,12 @@ from app.api.schemas import (
 )
 from app.api.dependencies import (
     get_rag_generator, get_quiz_generator, 
-    get_personalization_engine, get_answer_evaluator, get_model_name
+    get_personalization_engine, get_answer_evaluator, get_model_name, get_retriever
 )
 from app.ingest import ingest_file, load_processed
 from app.cleaning import clean_pages
 from app.chunking import chunk_pages
-from app.embeddings import load_embedding_model, embed_chunks
+from app.embeddings import embed_chunks
 from app.vector_store import create_index, save_index
 from app.config import CHUNK_SIZE, CHUNK_OVERLAP, MINIMUM_CHUNK_SIZE
 from app.progress import (
@@ -32,7 +32,7 @@ def health_check():
     return {"status": "ok", "model": get_model_name()}
 
 @router.post("/documents")
-def upload_document(file: UploadFile = File(...)):
+def upload_document(file: UploadFile = File(...), retriever = Depends(get_retriever)):
     """
     Upload and ingest a document.
     Executes synchronously in the FastAPI threadpool.
@@ -58,8 +58,7 @@ def upload_document(file: UploadFile = File(...)):
         cleaned = clean_pages(pages)
         chunks = chunk_pages(cleaned, CHUNK_SIZE, CHUNK_OVERLAP, MINIMUM_CHUNK_SIZE)
         
-        embed_model = load_embedding_model()
-        embeddings = embed_chunks(embed_model, chunks)
+        embeddings = embed_chunks(retriever.model, chunks)
         
         index = create_index(embeddings)
         save_index(index, chunks)
@@ -80,7 +79,7 @@ def ask_question(request: QAQuery, generator = Depends(get_rag_generator)):
     Delegates strictly to RAGGenerator.generate().
     """
     try:
-        res = generator.generate(request.query, top_k=request.top_k)
+        res = generator.generate(request.query, top_k=request.top_k, filename=request.filename)
         
         # Check for grounding refusal
         if not res.get("success", True) or res.get("answer") is None:
@@ -92,8 +91,11 @@ def ask_question(request: QAQuery, generator = Depends(get_rag_generator)):
         return {
             "success": True,
             "answer": res.get("answer"),
-            "citations": res.get("citations", []),
-            "retrieved_chunks": res.get("retrieved_chunks", [])
+            "citations": res.get("used_chunks", []),
+            "retrieved_chunks": res.get("retrieved_chunks", []),
+            "raw_llm_output": res.get("raw_llm_output", ""),
+            "first_raw_output": res.get("first_raw_output", ""),
+            "retry_triggered": res.get("retry_triggered", False)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

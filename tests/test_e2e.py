@@ -14,7 +14,7 @@ class MockE2EProvider(LLMProvider):
 class MockE2ERetriever:
     def __init__(self, chunks):
         self._chunks = chunks
-    def retrieve(self, query, top_k=5):
+    def retrieve(self, query, top_k=5, filename=None):
         if "moon" in query:
             return []
         for c in self._chunks:

@@ -8,7 +8,7 @@ from app.api.dependencies import (
 )
 
 class MockRAGGenerator:
-    def generate(self, query, top_k=5):
+    def generate(self, query, top_k=5, filename=None):
         if query == "How to bake a cake?":
             return {"success": False, "reason": "INSUFFICIENT_SOURCE_CONTEXT", "answer": None}
         return {
@@ -65,7 +65,7 @@ def test_invalid_request(client):
     assert response.status_code == 422 
 
 def test_ask_question_success(client):
-    response = client.post("/questions", json={"query": "What is AI?", "top_k": 5})
+    response = client.post("/questions", json={"query": "What is AI?", "top_k": 5, "filename": "test_document.pdf"})
     assert response.status_code == 200
     assert response.json()["success"] == True
     assert response.json()["answer"] == "This is a mocked answer."

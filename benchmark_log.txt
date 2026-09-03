@@ -1,0 +1,97 @@
+/home/nova/Desktop/RAG/.venv/lib/python3.14/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading retriever (shared across all models)...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 16651.76it/s]
+Retriever loaded.
+
+
+[LOADING] Qwen2.5-3B-Instruct [BASELINE] (Qwen/Qwen2.5-3B-Instruct) with int4 quantization...
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights:   0%|          | 1/434 [00:00<02:02,  3.54it/s]Loading weights:   1%|          | 4/434 [00:00<00:37, 11.57it/s]Loading weights:   3%|▎         | 15/434 [00:00<00:10, 41.52it/s]Loading weights:   6%|▌         | 25/434 [00:00<00:06, 59.01it/s]Loading weights:  12%|█▏        | 52/434 [00:00<00:03, 121.91it/s]Loading weights:  18%|█▊        | 77/434 [00:00<00:02, 155.79it/s]Loading weights:  26%|██▌       | 113/434 [00:00<00:01, 215.31it/s]Loading weights:  37%|███▋      | 159/434 [00:01<00:00, 285.43it/s]Loading weights:  45%|████▌     | 197/434 [00:01<00:00, 308.59it/s]Loading weights:  53%|█████▎    | 229/434 [00:01<00:00, 241.86it/s]Loading weights:  59%|█████▉    | 257/434 [00:01<00:01, 138.20it/s]Loading weights:  65%|██████▍   | 280/434 [00:01<00:01, 150.11it/s]Loading weights:  69%|██████▉   | 301/434 [00:01<00:00, 158.62it/s]Loading weights:  74%|███████▍  | 322/434 [00:02<00:00, 128.87it/s]Loading weights:  78%|███████▊  | 339/434 [00:02<00:00, 131.82it/s]Loading weights:  82%|████████▏ | 355/434 [00:02<00:00, 126.09it/s]Loading weights:  85%|████████▌ | 370/434 [00:02<00:00, 128.29it/s]Loading weights:  89%|████████▊ | 385/434 [00:02<00:00, 121.24it/s]Loading weights:  92%|█████████▏| 399/434 [00:02<00:00, 110.01it/s]Loading weights:  95%|█████████▍| 411/434 [00:03<00:00, 105.15it/s]Loading weights:  97%|█████████▋| 423/434 [00:03<00:00, 100.05it/s]Loading weights: 100%|██████████| 434/434 [00:03<00:00, 101.29it/s]Loading weights: 100%|██████████| 434/434 [00:03<00:00, 132.05it/s]
+[LOADED]  Qwen2.5-3B-Instruct [BASELINE] in 6.8s | VRAM allocated: 2.01 GB
+
+============================================================
+RUNNING: Qwen2.5-3B-Instruct [BASELINE]
+============================================================
+  Q 1/22 [DIRECT FACT] What is the efficiency of solar cells mentioned in this... 2.2s | OK[2cit] | retry=N
+  Q 2/22 [DIRECT FACT] What are the main types of solar cells?... 2.9s | OK[2cit] | retry=N
+  Q 3/22 [DIRECT FACT] What materials are used in PV module construction?... 2.1s | OK[2cit] | retry=N
+  Q 4/22 [EXPLANATION] Explain how a PV module is constructed.... 3.8s | OK[7cit] | retry=N
+  Q 5/22 [EXPLANATION] Explain solar energy storage according to this document... 3.8s | OK[5cit] | retry=N
+  Q 6/22 [EXPLANATION] Explain how solar collectors work according to this doc... 4.6s | OK[3cit] | retry=N
+  Q 7/22 [MULTI-CHUNK] Explain the relationship between solar radiation measur... 4.2s | OK[2cit] | retry=N
+  Q 8/22 [MULTI-CHUNK] How do solar energy storage and solar power plant desig... 1.8s | OK[2cit] | retry=N
+  Q 9/22 [COMPARISON] Compare grid-tied, off-grid, and hybrid solar power sys... 6.0s | OK[7cit] | retry=N
+  Q10/22 [COMPARISON] Compare different types of solar collectors mentioned i... 3.9s | OK[3cit] | retry=N
+  Q11/22 [DOCUMENT-WIDE] What are the important things I should study from this ... 1.9s | OK[2cit] | retry=N
+  Q12/22 [DOCUMENT-WIDE] Give me the big picture of this module.... 1.9s | OK[2cit] | retry=N
+  Q13/22 [DOCUMENT-WIDE] What are the main topics covered in this document?... 1.7s | OK[2cit] | retry=N
+  Q14/22 [AMBIGUOUS] What is important here?... 1.4s | OK[1cit] | retry=N
+  Q15/22 [AMBIGUOUS] What should I focus on?... 0.5s | REFUSAL | retry=N
+  Q16/22 [AMBIGUOUS] Explain this module to me.... 1.4s | OK[1cit] | retry=N
+  Q17/22 [OUT-OF-DOCUMENT] What does this document say about quantum computing?... 0.5s | REFUSAL | retry=N
+  Q18/22 [OUT-OF-DOCUMENT] What does this document say about nuclear reactor fuel ... 0.5s | REFUSAL | retry=N
+  Q19/22 [OUT-OF-DOCUMENT] Explain machine learning algorithms mentioned in this d... 0.5s | REFUSAL | retry=N
+  Q20/22 [TRICK] What is the exact cost of installing a solar power plan... 0.5s | REFUSAL | retry=N
+  Q21/22 [TRICK] What is the maximum efficiency of a PV module according... 0.6s | REFUSAL | retry=N
+  Q22/22 [TRICK] Who invented photovoltaic technology according to this ... 0.5s | REFUSAL | retry=N
+
+  SUMMARY: avg_latency=2.2s | peak_vram=2.16GB
+  citation_compliance=100% | refusals=7 | cite_fails=0 | retries=0
+  [Saved incremental results → /home/nova/Desktop/RAG/benchmark_results.json]
+[UNLOADED] Qwen2.5-3B-Instruct [BASELINE]
+
+[LOADING] Qwen3-4B [CANDIDATE] (Qwen/Qwen3-4B) with int4 quantization...
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [09:49<19:39, 589.82s/it]Fetching 3 files:  67%|██████▋   | 2/3 [32:36<17:26, 1046.62s/it]Fetching 3 files: 100%|██████████| 3/3 [35:18<00:00, 642.70s/it] Fetching 3 files: 100%|██████████| 3/3 [35:18<00:00, 706.08s/it]
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   0%|          | 1/398 [00:00<02:22,  2.78it/s]Loading weights:   3%|▎         | 12/398 [00:00<00:11, 33.06it/s]Loading weights:   6%|▌         | 22/398 [00:00<00:07, 51.20it/s]Loading weights:   9%|▊         | 34/398 [00:00<00:05, 70.88it/s]Loading weights:  12%|█▏        | 48/398 [00:00<00:04, 87.38it/s]Loading weights:  15%|█▌        | 60/398 [00:00<00:03, 92.98it/s]Loading weights:  18%|█▊        | 71/398 [00:01<00:04, 68.30it/s]Loading weights:  20%|██        | 81/398 [00:01<00:04, 73.76it/s]Loading weights:  23%|██▎       | 91/398 [00:01<00:04, 74.81it/s]Loading weights:  26%|██▌       | 102/398 [00:01<00:03, 80.03it/s]Loading weights:  28%|██▊       | 113/398 [00:01<00:03, 87.10it/s]Loading weights:  31%|███       | 124/398 [00:01<00:03, 90.94it/s]Loading weights:  34%|███▍      | 136/398 [00:01<00:02, 93.62it/s]Loading weights:  37%|███▋      | 148/398 [00:01<00:02, 95.12it/s]Loading weights:  40%|███▉      | 158/398 [00:02<00:02, 93.26it/s]Loading weights:  43%|████▎     | 170/398 [00:02<00:02, 95.08it/s]Loading weights:  46%|████▋     | 185/398 [00:02<00:01, 107.03it/s]Loading weights:  49%|████▉     | 196/398 [00:02<00:01, 106.43it/s]Loading weights:  52%|█████▏    | 207/398 [00:02<00:02, 95.48it/s] Loading weights:  55%|█████▍    | 217/398 [00:02<00:01, 93.72it/s]Loading weights:  57%|█████▋    | 227/398 [00:02<00:01, 93.91it/s]Loading weights:  60%|██████    | 239/398 [00:02<00:01, 100.31it/s]Loading weights:  63%|██████▎   | 251/398 [00:02<00:01, 103.51it/s]Loading weights:  66%|██████▋   | 264/398 [00:03<00:01, 108.15it/s]Loading weights:  69%|██████▉   | 276/398 [00:03<00:01, 111.18it/s]Loading weights:  72%|███████▏  | 288/398 [00:03<00:01, 97.77it/s] Loading weights:  75%|███████▌  | 300/398 [00:03<00:01, 97.76it/s]Loading weights:  78%|███████▊  | 311/398 [00:03<00:00, 91.23it/s]Loading weights:  81%|████████  | 323/398 [00:03<00:00, 93.46it/s]Loading weights:  84%|████████▍ | 335/398 [00:03<00:00, 94.04it/s]Loading weights:  87%|████████▋ | 345/398 [00:03<00:00, 92.45it/s]Loading weights:  89%|████████▉ | 356/398 [00:04<00:00, 91.39it/s]Loading weights:  92%|█████████▏| 368/398 [00:04<00:00, 93.60it/s]Loading weights:  96%|█████████▌| 382/398 [00:04<00:00, 105.53it/s]Loading weights:  99%|█████████▉| 394/398 [00:04<00:00, 107.02it/s]Loading weights: 100%|██████████| 398/398 [00:04<00:00, 89.67it/s] 
+[LOADED]  Qwen3-4B [CANDIDATE] in 2132.8s | VRAM allocated: 2.59 GB
+
+============================================================
+RUNNING: Qwen3-4B [CANDIDATE]
+============================================================
+  Q 1/22 [DIRECT FACT] What is the efficiency of solar cells mentioned in this... 5.9s | OK[1cit] | retry=N
+  Q 2/22 [DIRECT FACT] What are the main types of solar cells?... 13.2s | OK[8cit] | retry=N
+  Q 3/22 [DIRECT FACT] What materials are used in PV module construction?... 26.2s | OK[4cit] | retry=Y
+  Q 4/22 [EXPLANATION] Explain how a PV module is constructed.... 13.0s | OK[2cit] | retry=N
+  Q 5/22 [EXPLANATION] Explain solar energy storage according to this document... 13.0s | OK[6cit] | retry=N
+  Q 6/22 [EXPLANATION] Explain how solar collectors work according to this doc... 13.0s | OK[3cit] | retry=N
+  Q 7/22 [MULTI-CHUNK] Explain the relationship between solar radiation measur... 26.2s | CITE_FAIL | retry=Y
+  Q 8/22 [MULTI-CHUNK] How do solar energy storage and solar power plant desig... 13.0s | OK[4cit] | retry=N
+  Q 9/22 [COMPARISON] Compare grid-tied, off-grid, and hybrid solar power sys... 26.3s | OK[10cit] | retry=Y
+  Q10/22 [COMPARISON] Compare different types of solar collectors mentioned i... 26.3s | CITE_FAIL | retry=Y
+  Q11/22 [DOCUMENT-WIDE] What are the important things I should study from this ... 13.3s | OK[5cit] | retry=N
+  Q12/22 [DOCUMENT-WIDE] Give me the big picture of this module.... 10.8s | OK[4cit] | retry=N
+  Q13/22 [DOCUMENT-WIDE] What are the main topics covered in this document?... 12.9s | OK[20cit] | retry=N
+  Q14/22 [AMBIGUOUS] What is important here?... 11.7s | OK[6cit] | retry=N
+  Q15/22 [AMBIGUOUS] What should I focus on?... 13.2s | OK[20cit] | retry=N
+  Q16/22 [AMBIGUOUS] Explain this module to me.... 13.2s | OK[9cit] | retry=N
+  Q17/22 [OUT-OF-DOCUMENT] What does this document say about quantum computing?... 6.6s | REFUSAL | retry=N
+  Q18/22 [OUT-OF-DOCUMENT] What does this document say about nuclear reactor fuel ... 5.8s | REFUSAL | retry=N
+  Q19/22 [OUT-OF-DOCUMENT] Explain machine learning algorithms mentioned in this d... 7.2s | REFUSAL | retry=N
+  Q20/22 [TRICK] What is the exact cost of installing a solar power plan... 5.8s | REFUSAL | retry=N
+  Q21/22 [TRICK] What is the maximum efficiency of a PV module according... 24.6s | REFUSAL | retry=Y
+  Q22/22 [TRICK] Who invented photovoltaic technology according to this ... [transformers] This model config has set a `rope_parameters['original_max_position_embeddings']` field, to be used together with `max_position_embeddings` to determine a scaling factor. Please set the `factor` field of `rope_parameters`with this ratio instead -- we recommend the use of this field over `original_max_position_embeddings`, as it is compatible with most model architectures.
+[transformers] A new version of the following files was downloaded from https://huggingface.co/microsoft/Phi-4-mini-instruct:
+- modeling_phi3.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+6.2s | REFUSAL | retry=N
+
+  SUMMARY: avg_latency=14.0s | peak_vram=2.86GB
+  citation_compliance=91% | refusals=6 | cite_fails=2 | retries=5
+  [Saved incremental results → /home/nova/Desktop/RAG/benchmark_results.json]
+[UNLOADED] Qwen3-4B [CANDIDATE]
+
+[LOADING] Phi-4-mini-instruct 3.8B [CANDIDATE] (microsoft/Phi-4-mini-instruct) with int4 quantization...
+
+  [ERROR] Phi-4-mini-instruct 3.8B [CANDIDATE] failed: cannot import name 'LossKwargs' from 'transformers.utils' (/home/nova/Desktop/RAG/.venv/lib/python3.14/site-packages/transformers/utils/__init__.py)
+
+============================================================
+BENCHMARK COMPLETE
+Results saved to: /home/nova/Desktop/RAG/benchmark_results.json
+============================================================
+
+Model                                       VRAM  Avg Lat  Cite%  Fails  Retries
+--------------------------------------------------------------------------------
+  Qwen2.5-3B-Instruct [BASELINE]         2.16 GB     2.1s   100%      0        0
+  Qwen3-4B [CANDIDATE]                   2.86 GB    14.0s    91%      2        5
+  Phi-4-mini-instruct 3.8B [CANDIDATE]     ERROR      N/A    N/A    N/A      N/A

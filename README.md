@@ -4,12 +4,20 @@
 NEXORA is a file-based, provider-agnostic Study Assistant backend system (the "Core Brain"). It solves the problem of hallucination in educational AI by ingesting textbooks, manuals, and notes, and tightly coupling a Large Language Model to that specific material. It does not act as a general chatbot; instead, it acts as a highly disciplined tutor that refuses to answer questions outside the scope of the provided materials.
 
 ## What it can do
+
+### Mobile/Desktop App Features (Frontend)
+- **Interactive Study Sessions:** Chat dynamically with the AI about specific documents via a beautiful, clean messaging interface.
+- **Customized Quizzes:** Set up and take interactive multiple-choice quizzes with rich UI feedback and instantaneous grading.
+- **Progress Tracking & Analytics:** Visualize your learning journey with dynamic progress rings, detailed stats, and historical performance tracking.
+- **Smart Weakness Targeting:** The app's dashboard highlights topics that "Need Attention" and lets you instantly launch personalized quizzes focused on your specific weaknesses.
+- **Document Library:** Clean UI to manage, view, and select your uploaded study materials.
+- **Cross-Platform:** Built in Flutter, providing a native, beautiful experience across Mobile, Desktop (Linux/Windows/macOS), and Web.
+
+### Core Brain Intelligence (Backend)
 - **Read Educational PDFs:** Extracts text from both digital PDFs and scanned images (via OCR).
-- **Ground Answers:** Answers are generated strictly based on the uploaded material, effectively eliminating hallucinations.
-- **Refuse Unsupported Questions:** Employs a strict mathematical threshold to refuse to answer questions if the required information isn't found in the text.
-- **Generate Quizzes:** Creates Easy, Medium, and Hard multiple-choice quizzes dynamically from the text.
-- **Evaluate Answers:** Deterministically checks if a selected answer matches the correct option.
-- **Personalize Learning:** Tracks user progress and automatically identifies "weak topics", generating personalized quizzes focused on areas where the user struggles.
+- **Zero Hallucinations (Strict Grounding):** Employs a strict mathematical threshold to instantly refuse questions if the required information isn't found in the text.
+- **Dynamic Content Generation:** Creates Easy, Medium, and Hard multiple-choice quizzes directly from textbook material on the fly.
+- **Deterministic Evaluation:** Automatically grades answers and logs pass/fail metrics into a SQLite database to power the frontend analytics.
 
 ## Architecture
 

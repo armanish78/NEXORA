@@ -98,56 +98,63 @@ The repository has been fully validated against real educational PDFs and handwr
 ## Project Structure
 ```text
 NEXORA/
-├── app/
-│   ├── api/            # FastAPI routes, schemas, and dependencies
-│   ├── ingest.py       # PDF ingestion and OCR
-│   ├── chunking.py     # Semantic chunking
-│   ├── retrieve.py     # FAISS search
-│   ├── generator.py    # LLM QA generation
-│   ├── quiz_generator.py # LLM Quiz generation
-│   ├── database.py     # SQLite operations
-│   └── progress.py     # Personalization tracking
-├── data/               # Raw PDFs, processed text, and SQLite DB
-├── model/              # FAISS vector indexes
-├── scripts/            # CLI operational scripts
-├── tests/              # 243 automated unit tests
-├── docs/doc.md         # Detailed backend manual
-├── docs/implement.md   # Step-by-step execution guide
-└── requirements.txt    # Python dependencies
+├── backend/            # Core Brain Python Backend
+│   ├── app/            # FastAPI, RAG, Chunking, LLM generation
+│   ├── data/           # Raw PDFs, processed text, and SQLite DB
+│   ├── model/          # FAISS vector indexes
+│   ├── scripts/        # CLI operational scripts
+│   ├── tests/          # Automated unit tests
+│   ├── docs/           # Detailed backend manuals
+│   └── requirements.txt
+├── frontend/           # User-Facing Mobile/Desktop App
+│   └── nexora_app/     # Full Flutter application implementation
+└── README.md
 ```
 
 ## Installation
-Ensure you have Python 3 installed, as well as Tesseract OCR (system dependency).
+Ensure you have Python 3 installed, as well as Tesseract OCR for the backend, and the Flutter SDK for the frontend.
 
+### Backend Setup
 ```bash
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running the Core Brain / API
-
-### 1. Ingestion Pipeline
-To process a new PDF, place it in `data/raw/` and run the pipeline linearly:
+### Frontend Setup
 ```bash
+cd frontend/nexora_app
+flutter pub get
+```
+
+## Running the System
+
+### 1. Ingestion Pipeline (Backend)
+To process a new PDF, place it in `backend/data/raw/` and run the pipeline linearly from the `backend/` directory:
+```bash
+cd backend
 python scripts/run_ingestion.py
 python scripts/run_cleaning.py
 python scripts/run_indexing.py
 ```
 
-### 2. Run the API (For Mobile Clients)
+### 2. Run the Core Brain API (Backend)
+Start the FastAPI server to serve the frontend:
 ```bash
-uvicorn app.api.main:app --reload
+cd backend
+uvicorn app.api.main:app --host 0.0.0.0 --port 8000
 ```
-*The API will start at `http://127.0.0.1:8000`.*
 
-### 3. Run the Terminal Chat
+### 3. Run the Mobile/Desktop App (Frontend)
+With the backend API running, launch the Flutter application:
 ```bash
-python scripts/run_rag.py
+cd frontend/nexora_app
+flutter run
 ```
 
 ## API
-The FastAPI implementation provides the following core endpoints. For exact JSON payloads and error codes, see `docs/API_CONTRACT.md`.
+The FastAPI implementation provides the following core endpoints. For exact JSON payloads and error codes, see `backend/docs/API_CONTRACT.md`.
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
@@ -160,11 +167,11 @@ The FastAPI implementation provides the following core endpoints. For exact JSON
 | `GET`  | `/users/{id}/progress` | Fetch user learning analytics. |
 
 ## Testing
-Run the complete regression suite using:
+Run the complete regression suite for the backend using:
 ```bash
+cd backend
 python -m pytest
 ```
-**Current status:** 243 tests passing. 
 **IMPORTANT:** The test suite utilizes a strict test-isolation fix to aggressively mock the LLM. You must never accidentally initialize the real `Qwen` model during `pytest`, as it will cause kernel Out-Of-Memory (OOM) crashes.
 
 ## Known Limitations
@@ -174,29 +181,28 @@ python -m pytest
 - **Structural Mistakes:** The LLM may occasionally fail JSON formatting, requiring a slow retry cycle.
 - **Hardware Bound:** Requires a dedicated GPU (e.g. RTX 4050 6GB) for acceptable performance.
 
-## Mobile App Relationship
-The intended architecture separates the heavy AI lifting from the user's device:
+## Mobile App Relationship & Repository Status
+The project architecture successfully separates the heavy AI lifting from the user's device:
 
 ```text
- Mobile App (Flutter/Kotlin)  --> (Lightweight Client)
+ Mobile App (Flutter)         --> (Lightweight Cross-Platform UI)
           ↓
          API                  --> (FastAPI server)
           ↓
       Core Brain              --> (Python Backend)
           ↓
-     Qwen + RAG               --> (Heavy GPU compute)
+     Qwen + RAG               --> (Heavy GPU compute / 4-bit)
 ```
-The mobile app is strictly a client and should **not** attempt to run Qwen locally.
 
-## Repository Status
-**CORE BRAIN: COMPLETE / FROZEN**
+**REPOSITORY STATUS: FULLY INTEGRATED & OPERATIONAL**
 
-The intelligence layer is finalized. Changing the model, embeddings, grounding threshold, retrieval behavior, prompts, validators, or retry logic is strictly prohibited without initiating a full, manual revalidation sequence.
+- **Frontend (Flutter):** Fully developed and actively communicating with the backend. It dynamically fetches topics, renders study material, handles quiz sessions, and displays real-time progress.
+- **Backend (Python):** Complete and frozen. The 4-bit quantized `Qwen2.5-3B-Instruct` model successfully runs locally on a 6GB VRAM GPU without memory leaks.
 
 ## Documentation
-- [Backend Master Manual (`docs/doc.md`)](docs/doc.md)
-- [Linear Implementation Guide (`docs/implement.md`)](docs/implement.md)
-- [API Contract (`docs/API_CONTRACT.md`)](docs/API_CONTRACT.md)
+- [Backend Master Manual (`backend/docs/doc.md`)](backend/docs/doc.md)
+- [Linear Implementation Guide (`backend/docs/implement.md`)](backend/docs/implement.md)
+- [API Contract (`backend/docs/API_CONTRACT.md`)](backend/docs/API_CONTRACT.md)
 
 ## License
 No license has currently been specified for this repository.

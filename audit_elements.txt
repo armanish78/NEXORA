@@ -1,0 +1,52 @@
+frontend/nexora_app/lib/core/widgets/nexora_button.dart:      child: ElevatedButton(
+frontend/nexora_app/lib/core/widgets/nexora_button.dart:        onPressed: isLoading ? () {} : onPressed,
+frontend/nexora_app/lib/core/widgets/nexora_button.dart:    return ElevatedButton.styleFrom(
+frontend/nexora_app/lib/core/widgets/nexora_card.dart:    return GestureDetector(
+frontend/nexora_app/lib/core/widgets/nexora_card.dart:      onTap: onTap,
+frontend/nexora_app/lib/features/home/app_shell.dart:    return GestureDetector(
+frontend/nexora_app/lib/features/home/app_shell.dart:      onTap: () {
+frontend/nexora_app/lib/features/home/widgets/thread/current_thread_node.dart:                  onPressed: isLoading ? null : onAction,
+frontend/nexora_app/lib/features/home/widgets/recent_materials_list.dart:              GestureDetector(
+frontend/nexora_app/lib/features/home/widgets/recent_materials_list.dart:                onTap: onViewLibrary,
+frontend/nexora_app/lib/features/home/widgets/home_header.dart:                    child: IconButton(
+frontend/nexora_app/lib/features/home/widgets/home_header.dart:                      onPressed: () {},
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:                  onTap: onAddMaterial,
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:                  onTap: onStartQuiz,
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:                  onTap: onAskAiTutor,
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:                  onTap: onContinueStudy,
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:    return GestureDetector(
+frontend/nexora_app/lib/features/home/widgets/core_actions_grid.dart:      onTap: isDisabled ? null : onTap,
+frontend/nexora_app/lib/features/home/widgets/needs_attention_card.dart:                    GestureDetector(
+frontend/nexora_app/lib/features/home/widgets/needs_attention_card.dart:                      onTap: onPractice,
+frontend/nexora_app/lib/features/home/widgets/ask_nexora_bar.dart:    return GestureDetector(
+frontend/nexora_app/lib/features/home/widgets/ask_nexora_bar.dart:      onTap: onTap,
+frontend/nexora_app/lib/features/home/widgets/empty_learning_hero.dart:                GestureDetector(
+frontend/nexora_app/lib/features/home/widgets/empty_learning_hero.dart:                  onTap: onAddMaterial,
+frontend/nexora_app/lib/features/home/screens/home_screen.dart:                onTap: () {
+frontend/nexora_app/lib/features/home/screens/home_screen.dart:                onTap: () {
+frontend/nexora_app/lib/features/home/screens/home_screen.dart:                          onTap: () {
+frontend/nexora_app/lib/features/study/widgets/suggested_questions.dart:                GestureDetector(
+frontend/nexora_app/lib/features/study/widgets/suggested_questions.dart:                  onTap: _rotateQuestions,
+frontend/nexora_app/lib/features/study/widgets/suggested_questions.dart:    return InkWell(
+frontend/nexora_app/lib/features/study/widgets/suggested_questions.dart:      onTap: () => widget.onQuestionSelected(question),
+frontend/nexora_app/lib/features/study/widgets/chat_bubble.dart:              GestureDetector(
+frontend/nexora_app/lib/features/study/widgets/chat_bubble.dart:                onTap: onRetry,
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:            child: IconButton(
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:              onPressed: () => Navigator.pop(context),
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:              child: IconButton(
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:                onPressed: () {},
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:                child: GestureDetector(
+frontend/nexora_app/lib/features/study/screens/study_screen.dart:                  onTap: _isLoading ? null : () => _sendMessage(_controller.text),
+frontend/nexora_app/lib/features/documents/widgets/library_empty_state.dart:            onPressed: onAddMaterial,
+frontend/nexora_app/lib/features/documents/widgets/library_empty_state.dart:            onPressed: onAddMaterial,
+frontend/nexora_app/lib/features/documents/widgets/library_filter_row.dart:            child: GestureDetector(
+frontend/nexora_app/lib/features/documents/widgets/library_filter_row.dart:              onTap: () => onFilterChanged(filter),
+frontend/nexora_app/lib/features/documents/widgets/document_list_item.dart:      child: GestureDetector(
+frontend/nexora_app/lib/features/documents/widgets/document_list_item.dart:        onTap: onTap,
+frontend/nexora_app/lib/features/documents/widgets/library_search_bar.dart:                  IconButton(
+frontend/nexora_app/lib/features/documents/widgets/library_search_bar.dart:                    onPressed: onClear,
+frontend/nexora_app/lib/features/documents/screens/library_screen.dart:                onTap: () {
+frontend/nexora_app/lib/features/documents/screens/library_screen.dart:                onTap: () {
+frontend/nexora_app/lib/features/documents/screens/library_screen.dart:                                onTap: () {
+frontend/nexora_app/lib/features/documents/screens/library_screen.dart:                              GestureDetector(
+frontend/nexora_app/lib/features/documents/screens/library_screen.dart:                                onTap: _showAddMaterialOptions,

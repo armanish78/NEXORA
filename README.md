@@ -63,6 +63,7 @@ Deterministic Evaluation / Progress
 ## Model
 The core intelligence is powered by **`Qwen/Qwen2.5-3B-Instruct`**, chosen because it demonstrated a 100% success rate at adhering to strict JSON formatting constraints during validation (unlike the 0.5B variant).
 - **Execution:** Runs entirely locally on the backend.
+- **Quantization:** Uses `bitsandbytes` 4-bit (`nf4`) quantization to fit the 3B parameter model completely within a 6GB VRAM limit without CPU offloading.
 - **Device Placement:** Handled automatically (`device_map="auto"`).
 - **Latency:** ~28 seconds to generate a full quiz on an RTX 4050 (6GB VRAM).
 - **Protection:** Includes a retry/validation loop. If the model outputs malformed JSON or forgets to cite its sources, the system automatically catches the error and forces the model to rewrite the output.
@@ -110,8 +111,8 @@ NEXORA/
 ├── model/              # FAISS vector indexes
 ├── scripts/            # CLI operational scripts
 ├── tests/              # 243 automated unit tests
-├── doc.md              # Detailed backend manual
-├── implement.md        # Step-by-step execution guide
+├── docs/doc.md         # Detailed backend manual
+├── docs/implement.md   # Step-by-step execution guide
 └── requirements.txt    # Python dependencies
 ```
 
@@ -193,8 +194,8 @@ The mobile app is strictly a client and should **not** attempt to run Qwen local
 The intelligence layer is finalized. Changing the model, embeddings, grounding threshold, retrieval behavior, prompts, validators, or retry logic is strictly prohibited without initiating a full, manual revalidation sequence.
 
 ## Documentation
-- [Backend Master Manual (`doc.md`)](doc.md)
-- [Linear Implementation Guide (`implement.md`)](implement.md)
+- [Backend Master Manual (`docs/doc.md`)](docs/doc.md)
+- [Linear Implementation Guide (`docs/implement.md`)](docs/implement.md)
 - [API Contract (`docs/API_CONTRACT.md`)](docs/API_CONTRACT.md)
 
 ## License

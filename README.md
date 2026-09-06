@@ -1,216 +1,825 @@
-# NEXORA — Neural Knowledge Retrieval & Reasoning Engine
+# NEXORA
 
-## What is NEXORA?
-NEXORA is a file-based, provider-agnostic Study Assistant backend system (the "Core Brain"). It solves the problem of hallucination in educational AI by ingesting textbooks, manuals, and notes, and tightly coupling a Large Language Model to that specific material. It does not act as a general chatbot; instead, it acts as a highly disciplined tutor that refuses to answer questions outside the scope of the provided materials.
+## Neural Knowledge Retrieval & Reasoning Engine
 
-## What it can do
+NEXORA is a **file-grounded AI Study Assistant** designed to help students learn directly from their own study material.
 
-### Mobile/Desktop App Features (Frontend)
-- **Interactive Study Sessions:** Chat dynamically with the AI about specific documents via a beautiful, clean messaging interface.
-- **Customized Quizzes:** Set up and take interactive multiple-choice quizzes with rich UI feedback and instantaneous grading.
-- **Progress Tracking & Analytics:** Visualize your learning journey with dynamic progress rings, detailed stats, and historical performance tracking.
-- **Smart Weakness Targeting:** The app's dashboard highlights topics that "Need Attention" and lets you instantly launch personalized quizzes focused on your specific weaknesses.
-- **Document Library:** Clean UI to manage, view, and select your uploaded study materials.
-- **Cross-Platform:** Built in Flutter, providing a native, beautiful experience across Mobile, Desktop (Linux/Windows/macOS), and Web.
+Instead of behaving like a general-purpose chatbot, NEXORA is built around a strict principle:
 
-### Core Brain Intelligence (Backend)
-- **Read Educational PDFs:** Extracts text from both digital PDFs and scanned images (via OCR).
-- **Zero Hallucinations (Strict Grounding):** Employs a strict mathematical threshold to instantly refuse questions if the required information isn't found in the text.
-- **Dynamic Content Generation:** Creates Easy, Medium, and Hard multiple-choice quizzes directly from textbook material on the fly.
-- **Deterministic Evaluation:** Automatically grades answers and logs pass/fail metrics into a SQLite database to power the frontend analytics.
+> **The AI should answer from the user's study material, not from whatever it happens to know.**
 
-## Architecture
+The system combines a local Retrieval-Augmented Generation (RAG) pipeline with a Flutter application to provide grounded question answering, quiz generation, answer evaluation, and personalized learning.
 
-NEXORA operates entirely on the backend, processing documents sequentially:
+---
+
+## Project Status
+
+> **Current Stage: Flutter Application Development**
+
+The NEXORA **Core Brain** has been developed around a local RAG pipeline using document ingestion, semantic chunking, embeddings, FAISS retrieval, grounding validation, and the Qwen LLM.
+
+The project is now moving through the **Flutter application development phase**, where the intelligence layer is being connected to a polished cross-platform user experience.
+
+### Current architecture
 
 ```text
-User Material (PDFs/Images)
-          ↓
-  Ingestion / OCR
-          ↓
-  Text Cleaning
-          ↓
-Semantic Chunking (512 chars)
-          ↓
-  all-MiniLM-L6-v2
-          ↓
-Vector Index (FAISS)
-          ↓
-Retrieval + Adjacent Chunk Expansion
-          ↓
- Grounding Gate (0.35)
-          ↓
- Qwen2.5-3B-Instruct (Backend Execution)
-          ↓
-QA / Quiz / Personalization
-          ↓
-Deterministic Evaluation / Progress
+                    NEXORA
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+     Flutter App               Core Brain
+     (Frontend)                 (Backend)
+          │                         │
+          │                      Python
+          │                      FastAPI
+          │                         │
+          │                    RAG Pipeline
+          │                         │
+          │                  FAISS + Embeddings
+          │                         │
+          │                    Qwen 2.5 3B
+          │                         │
+          └────────────── API ───────┘
 ```
-*(Note: The LLM runs locally on the backend server, NOT on the user's mobile device).*
 
-## Technology Stack
-- **Language:** Python
-- **LLM:** `Qwen/Qwen2.5-3B-Instruct`
-- **Embeddings:** `all-MiniLM-L6-v2` (via SentenceTransformers / HuggingFace)
-- **Vector Database:** FAISS
-- **State Database:** SQLite
-- **API Framework:** FastAPI
-- **Document Processing:** PyMuPDF, PyTesseract (OCR)
+The heavy AI workload runs on the backend rather than on the user's mobile device.
 
-## Core Brain Components
-- `app/ingest.py`, `app/ocr.py`: Handles document parsing and image-to-text extraction.
-- `app/cleaning.py`: Normalizes text and removes OCR artifacts/headers.
-- `app/chunking.py`: Intelligently cuts text without fracturing semantic paragraphs.
-- `app/embeddings.py`, `app/vector_store.py`: Manages the mathematical representation and storage of text.
-- `app/retrieve.py`: Searches the FAISS index for relevant chunks.
-- `app/generator.py`, `app/quiz_generator.py`: Enforces strict formatting and JSON validation on the LLM output.
-- `app/answer_evaluator.py`, `app/progress.py`: Handles deterministic grading and stores user metrics.
-- `app/personalization.py`: Analyzes the SQLite database to identify weaknesses for targeted learning.
-- `app/api/`: Exposes the intelligence as a REST API.
+---
 
-## Model
-The core intelligence is powered by **`Qwen/Qwen2.5-3B-Instruct`**, chosen because it demonstrated a 100% success rate at adhering to strict JSON formatting constraints during validation (unlike the 0.5B variant).
-- **Execution:** Runs entirely locally on the backend.
-- **Quantization:** Uses `bitsandbytes` 4-bit (`nf4`) quantization to fit the 3B parameter model completely within a 6GB VRAM limit without CPU offloading.
-- **Device Placement:** Handled automatically (`device_map="auto"`).
-- **Latency:** ~28 seconds to generate a full quiz on an RTX 4050 (6GB VRAM).
-- **Protection:** Includes a retry/validation loop. If the model outputs malformed JSON or forgets to cite its sources, the system automatically catches the error and forces the model to rewrite the output.
+# What is NEXORA?
 
-## Grounding and Safety
-NEXORA utilizes a strict **Grounding Gate** threshold (`0.35`) calibrated to the `all-MiniLM-L6-v2` embeddings. 
-Before the LLM is even loaded, the system checks the mathematical relevance of the search results. If the top result scores worse than `0.35`, the system **instantly refuses** the request, returning `INSUFFICIENT_SOURCE_CONTEXT`. This prevents unnecessary LLM generation and guarantees the AI does not hallucinate answers from its general knowledge.
+NEXORA is a personalized study environment built around the user's own educational material.
 
-## Quiz Generation
-Quizzes are generated in strict JSON with:
-- **Difficulty Levels:** Easy (requires 1 chunk of context), Medium (2 chunks), Hard (4 chunks).
-- **Format:** 4 options (1 correct, 3 distractors).
-- **Explanations:** Each correct answer includes a detailed explanation.
-- **Citations:** Every generated answer requires explicit source chunk IDs mapping back to the textbook.
+A typical workflow is:
 
-## Personalization and Evaluation
-- **Evaluation:** Answers are evaluated deterministically by comparing the user's selected choice to the generated correct option.
-- **Progress:** Pass/fail data is logged into an SQLite database.
-- **Personalization:** The backend analyzes recent performance to detect "weak topics", instructing the `QuizGenerator` to focus entirely on those subjects when a personalized quiz is requested.
+```text
+Study Material
+     ↓
+PDF / Document Ingestion
+     ↓
+Text Extraction / OCR
+     ↓
+Text Cleaning
+     ↓
+Semantic Chunking
+     ↓
+Embeddings
+     ↓
+FAISS Vector Index
+     ↓
+Relevant Context Retrieval
+     ↓
+Grounding Gate
+     ↓
+Qwen LLM
+     ↓
+Grounded Answer / Quiz
+     ↓
+Evaluation
+     ↓
+Learning Progress
+```
 
-## Validation
-The repository has been fully validated against real educational PDFs and handwritten notes.
-- **Quiz/QA Success:** 14/15 first-attempt success rate using `Qwen2.5-3B-Instruct`. The model occasionally produces structural mistakes (e.g., hallucinated chunk IDs), but the system's strict validator and retry mechanism successfully catches and corrects these on subsequent attempts.
-- **Grounding:** Successfully refuses questions outside the scope of the material.
-- **Testing:** The automated test suite contains **243 passing regression tests**.
+The Flutter application provides the user-facing experience while the backend handles the computationally expensive intelligence layer.
 
-## Hardware / Performance
-- **Measured Hardware:** Tested on an NVIDIA RTX 4050 (6 GB VRAM).
-- **Latency:** ~28 seconds per quiz generation.
-- **Offloading:** The system utilizes automatic CPU offloading when VRAM is constrained.
+---
 
-## Project Structure
+# Core Features
+
+## 📚 Material-Based Learning
+
+NEXORA works with the user's own educational material rather than relying on unrestricted general knowledge.
+
+Supported material processing includes:
+
+* Digital PDFs
+* Scanned PDFs
+* Image-based material
+* OCR extraction
+* Text cleaning
+* Semantic chunking
+* Vector indexing
+
+---
+
+## 🧠 Grounded Question Answering
+
+Users can ask questions about their uploaded material.
+
+The system:
+
+1. Converts the material into searchable semantic chunks.
+2. Retrieves the most relevant chunks.
+3. Checks whether sufficient context exists.
+4. Passes grounded context to the LLM.
+5. Generates an answer constrained by the retrieved material.
+6. Returns source references alongside the answer.
+
+If the required information cannot be sufficiently supported by the material, NEXORA refuses to answer instead of guessing.
+
+```text
+Question
+   ↓
+Semantic Retrieval
+   ↓
+Relevance Check
+   ↓
+Grounding Gate
+   │
+   ├── Insufficient → Refuse
+   │
+   └── Sufficient
+          ↓
+        Qwen
+          ↓
+   Grounded Answer
+          ↓
+       Sources
+```
+
+---
+
+# 🔒 Grounding & Hallucination Control
+
+One of the main design goals of NEXORA is reducing hallucination in educational use cases.
+
+The retrieval system uses a calibrated relevance threshold.
+
+Current grounding threshold:
+
+```text
+0.35
+```
+
+If the retrieved context does not meet the required relevance threshold, the request is rejected with:
+
+```text
+INSUFFICIENT_SOURCE_CONTEXT
+```
+
+This prevents the system from unnecessarily invoking the LLM when the available material does not contain sufficient evidence.
+
+The LLM is therefore not treated as the source of truth.
+
+The **study material is the source of truth**.
+
+---
+
+# 📝 Quiz Generation
+
+NEXORA can generate multiple-choice quizzes from the user's study material.
+
+### Difficulty Levels
+
+| Difficulty | Context Requirement |
+| ---------- | ------------------- |
+| Easy       | 1 relevant chunk    |
+| Medium     | 2 relevant chunks   |
+| Hard       | 4 relevant chunks   |
+
+Each question contains:
+
+* Question
+* Four answer options
+* One correct answer
+* Explanation
+* Source chunk references
+
+The generation pipeline uses structured JSON validation to ensure the model output conforms to the expected format.
+
+---
+
+# 🎯 Answer Evaluation
+
+Quiz answers are evaluated deterministically.
+
+The system does not ask the LLM whether the user was correct.
+
+Instead:
+
+```text
+User Selection
+      ↓
+Correct Option
+      ↓
+Deterministic Comparison
+      ↓
+Correct / Incorrect
+```
+
+This makes answer evaluation predictable and independent of model variability.
+
+---
+
+# 📈 Learning Progress
+
+NEXORA tracks quiz performance using the backend state database.
+
+The system records information such as:
+
+* Quiz attempts
+* Correct answers
+* Incorrect answers
+* Pass/fail outcomes
+* Topic performance
+
+This information is then used by the personalization system.
+
+---
+
+# 🎯 Personalized Learning
+
+NEXORA can identify areas where the learner is struggling.
+
+The personalization pipeline analyzes previous performance and identifies weak topics.
+
+A personalized quiz can then be generated around those topics.
+
+```text
+Quiz Attempts
+     ↓
+Performance Data
+     ↓
+Weak Topic Detection
+     ↓
+Personalized Context
+     ↓
+Targeted Quiz
+```
+
+The goal is to move beyond simply generating questions and instead create a feedback loop for learning.
+
+---
+
+# 🏗️ Architecture
+
+NEXORA is divided into two major systems.
+
+## 1. Flutter Application
+
+The Flutter application is the user-facing layer.
+
+It is responsible for:
+
+* Navigation
+* Study material management
+* User interaction
+* Question and answer interfaces
+* Quiz interfaces
+* Progress visualization
+* Communication with the backend API
+
+The application is being developed with a focus on a clean, modern study-oriented experience.
+
+---
+
+## 2. Core Brain
+
+The Core Brain is the computational intelligence layer.
+
+It is responsible for:
+
+* Document ingestion
+* OCR
+* Text cleaning
+* Semantic chunking
+* Embeddings
+* Vector search
+* Retrieval
+* Context expansion
+* Grounding
+* LLM generation
+* Quiz generation
+* Answer evaluation
+* Progress tracking
+* Personalization
+
+---
+
+# Core Brain Architecture
+
+```text
+PDF / Image
+     ↓
+Ingestion
+     ↓
+OCR
+     ↓
+Cleaning
+     ↓
+Semantic Chunking
+     ↓
+all-MiniLM-L6-v2
+     ↓
+FAISS
+     ↓
+Retrieval
+     ↓
+Adjacent Chunk Expansion
+     ↓
+Grounding Gate
+     ↓
+Qwen2.5-3B-Instruct
+     ↓
+ ┌───────────────┬────────────────┐
+ │               │                │
+ QA          Quiz Generation   Personalization
+ │               │                │
+ └───────────────┴────────────────┘
+                 ↓
+          Deterministic Evaluation
+                 ↓
+              Progress
+```
+
+---
+
+# Technology Stack
+
+## Frontend
+
+* **Framework:** Flutter
+* **Language:** Dart
+* **State Management:** Riverpod
+* **UI:** Material 3
+* **Platform:** Cross-platform
+
+---
+
+## Backend
+
+* **Language:** Python
+* **API:** FastAPI
+* **Database:** SQLite
+* **Vector Search:** FAISS
+* **Embeddings:** `all-MiniLM-L6-v2`
+* **LLM:** `Qwen/Qwen2.5-3B-Instruct`
+
+---
+
+## Document Processing
+
+* **PDF Processing:** PyMuPDF
+* **OCR:** PyTesseract
+* **Text Processing:** Custom cleaning and semantic chunking pipeline
+
+---
+
+## Model Execution
+
+The Qwen model runs locally on the backend.
+
+The Flutter application does **not** run the 3B parameter model directly on the user's device.
+
+```text
+Flutter Device
+      │
+      │ HTTP
+      ↓
+FastAPI Backend
+      │
+      ↓
+RAG Pipeline
+      │
+      ↓
+Qwen 2.5 3B
+      │
+      ↓
+Grounded Response
+      │
+      ↓
+Flutter Device
+```
+
+---
+
+# Model
+
+NEXORA currently uses:
+
+```text
+Qwen/Qwen2.5-3B-Instruct
+```
+
+The model was selected after validation against structured generation requirements.
+
+### Configuration
+
+* 4-bit quantization
+* `bitsandbytes`
+* `nf4`
+* Automatic device mapping
+* Local backend execution
+
+The model is designed to run within a constrained GPU environment rather than requiring a large cloud inference service.
+
+---
+
+# Performance
+
+The Core Brain has been tested on:
+
+```text
+GPU: NVIDIA RTX 4050
+VRAM: 6 GB
+```
+
+Approximate quiz generation latency:
+
+```text
+~28 seconds
+```
+
+Because generation is computationally expensive, the Flutter application is designed around asynchronous requests and appropriate loading states.
+
+---
+
+# Repository Structure
+
 ```text
 NEXORA/
-├── backend/            # Core Brain Python Backend
-│   ├── app/            # FastAPI, RAG, Chunking, LLM generation
-│   ├── data/           # Raw PDFs, processed text, and SQLite DB
-│   ├── model/          # FAISS vector indexes
-│   ├── scripts/        # CLI operational scripts
-│   ├── tests/          # Automated unit tests
-│   ├── docs/           # Detailed backend manuals
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── ingest.py
+│   │   ├── ocr.py
+│   │   ├── cleaning.py
+│   │   ├── chunking.py
+│   │   ├── embeddings.py
+│   │   ├── vector_store.py
+│   │   ├── retrieve.py
+│   │   ├── generator.py
+│   │   ├── quiz_generator.py
+│   │   ├── answer_evaluator.py
+│   │   ├── progress.py
+│   │   └── personalization.py
+│   │
+│   ├── data/
+│   │   ├── raw/
+│   │   └── processed/
+│   │
+│   ├── model/
+│   │
+│   ├── scripts/
+│   │
+│   ├── tests/
+│   │
+│   ├── docs/
+│   │
 │   └── requirements.txt
-├── frontend/           # User-Facing Mobile/Desktop App
-│   └── nexora_app/     # Full Flutter application implementation
+│
+├── frontend/
+│   └── nexora_app/
+│       ├── lib/
+│       ├── assets/
+│       ├── test/
+│       └── pubspec.yaml
+│
 └── README.md
 ```
 
-## Installation
-Ensure you have Python 3 installed, as well as Tesseract OCR for the backend, and the Flutter SDK for the frontend.
+---
 
-### Backend Setup
+# Flutter Application
+
+The Flutter application is currently under active development.
+
+Its purpose is to turn the Core Brain capabilities into a complete study experience.
+
+The application is being developed around several major areas:
+
+```text
+Home
+  ↓
+Library
+  ↓
+Study Material
+  ↓
+Ask / Learn
+  ↓
+Quiz
+  ↓
+Results
+  ↓
+Progress
+```
+
+The frontend communicates with the Core Brain through the FastAPI backend.
+
+---
+
+# Frontend Development Principles
+
+The Flutter application follows several principles:
+
+### Clean Separation
+
+UI logic should remain separate from backend communication and data processing.
+
+### Reactive State
+
+Riverpod is used for application state and asynchronous backend data.
+
+### Material 3
+
+The application uses Material 3 components and a consistent design system.
+
+### Study-First UX
+
+The interface should prioritize:
+
+* Reading
+* Understanding
+* Asking questions
+* Practicing
+* Reviewing mistakes
+* Tracking progress
+
+### Backend Intelligence
+
+Heavy AI processing remains on the backend.
+
+The Flutter application should remain lightweight.
+
+---
+
+# API
+
+The FastAPI backend exposes the Core Brain through REST endpoints.
+
+| Method | Endpoint                | Purpose                           |
+| ------ | ----------------------- | --------------------------------- |
+| GET    | `/health`               | Backend health and readiness      |
+| POST   | `/documents`            | Upload and process study material |
+| POST   | `/questions`            | Ask a grounded question           |
+| POST   | `/quizzes`              | Generate a quiz                   |
+| POST   | `/quizzes/personalized` | Generate a personalized quiz      |
+| POST   | `/answers`              | Evaluate a quiz answer            |
+| GET    | `/users/{id}/progress`  | Retrieve learning progress        |
+
+The complete API contract is maintained separately in:
+
+```text
+backend/docs/API_CONTRACT.md
+```
+
+---
+
+# Installation
+
+## Requirements
+
+You will need:
+
+* Python 3
+* Flutter SDK
+* Tesseract OCR
+* NVIDIA GPU recommended for local Qwen inference
+
+---
+
+## Backend Setup
+
 ```bash
 cd backend
+
 python3 -m venv .venv
 source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
-### Frontend Setup
+---
+
+## Frontend Setup
+
 ```bash
 cd frontend/nexora_app
+
 flutter pub get
 ```
 
-## Running the System
+---
 
-### 1. Ingestion Pipeline (Backend)
-To process a new PDF, place it in `backend/data/raw/` and run the pipeline linearly from the `backend/` directory:
+# Running NEXORA
+
+## 1. Prepare Study Material
+
+Place the source material inside:
+
+```text
+backend/data/raw/
+```
+
+Run the ingestion pipeline:
+
 ```bash
 cd backend
+
 python scripts/run_ingestion.py
 python scripts/run_cleaning.py
 python scripts/run_indexing.py
 ```
 
-### 2. Run the Core Brain API (Backend)
-Start the FastAPI server to serve the frontend:
+---
+
+## 2. Start the Backend
+
 ```bash
 cd backend
+
 uvicorn app.api.main:app --host 0.0.0.0 --port 8000
 ```
 
-### 3. Run the Mobile/Desktop App (Frontend)
-With the backend API running, launch the Flutter application:
+The backend will expose the API on port `8000`.
+
+---
+
+## 3. Start the Flutter Application
+
 ```bash
 cd frontend/nexora_app
+
 flutter run
 ```
 
-## API
-The FastAPI implementation provides the following core endpoints. For exact JSON payloads and error codes, see `backend/docs/API_CONTRACT.md`.
+For Flutter Web:
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| `GET`  | `/health` | Check backend status and model readiness. |
-| `POST` | `/documents` | Upload a PDF for OCR and indexing. |
-| `POST` | `/questions` | Ask a question and get a grounded answer with citations. |
-| `POST` | `/quizzes` | Generate a standard MCQ quiz. |
-| `POST` | `/quizzes/personalized` | Generate a quiz targeted at weak topics. |
-| `POST` | `/answers` | Submit a quiz answer for grading. |
-| `GET`  | `/users/{id}/progress` | Fetch user learning analytics. |
+```bash
+flutter run -d chrome
+```
 
-## Testing
-Run the complete regression suite for the backend using:
+---
+
+# Testing
+
+The backend contains an automated regression suite.
+
+Run:
+
 ```bash
 cd backend
 python -m pytest
 ```
-**IMPORTANT:** The test suite utilizes a strict test-isolation fix to aggressively mock the LLM. You must never accidentally initialize the real `Qwen` model during `pytest`, as it will cause kernel Out-Of-Memory (OOM) crashes.
 
-## Known Limitations
-- **Latency:** Quiz generation takes ~28s. This requires loading states on mobile clients.
-- **Concurrency:** This is currently a single-player backend. Attempting to generate two quizzes concurrently will cause OOM crashes due to VRAM limits.
-- **OCR Limitations:** Handwritten text OCR accuracy is extremely low.
-- **Structural Mistakes:** The LLM may occasionally fail JSON formatting, requiring a slow retry cycle.
-- **Hardware Bound:** Requires a dedicated GPU (e.g. RTX 4050 6GB) for acceptable performance.
+The test suite is designed to prevent accidental initialization of the real Qwen model during testing.
 
-## Mobile App Relationship & Repository Status
-The project architecture successfully separates the heavy AI lifting from the user's device:
+This is important because loading the model unnecessarily during tests can consume significant GPU memory.
+
+---
+
+# Validation
+
+The Core Brain has been validated against educational PDFs and handwritten study material.
+
+Current validation includes:
+
+* Grounded question answering
+* Out-of-context refusal
+* Quiz generation
+* JSON validation
+* Retry handling
+* Deterministic answer evaluation
+* Progress tracking
+* Personalization logic
+
+The backend regression suite currently contains:
 
 ```text
- Mobile App (Flutter)         --> (Lightweight Cross-Platform UI)
-          ↓
-         API                  --> (FastAPI server)
-          ↓
-      Core Brain              --> (Python Backend)
-          ↓
-     Qwen + RAG               --> (Heavy GPU compute / 4-bit)
+243 passing tests
 ```
 
-**REPOSITORY STATUS: FULLY INTEGRATED & OPERATIONAL**
+---
 
-- **Frontend (Flutter):** Fully developed and actively communicating with the backend. It dynamically fetches topics, renders study material, handles quiz sessions, and displays real-time progress.
-- **Backend (Python):** Complete and frozen. The 4-bit quantized `Qwen2.5-3B-Instruct` model successfully runs locally on a 6GB VRAM GPU without memory leaks.
+# Known Limitations
 
-## Documentation
-- [Backend Master Manual (`backend/docs/doc.md`)](backend/docs/doc.md)
-- [Linear Implementation Guide (`backend/docs/implement.md`)](backend/docs/implement.md)
-- [API Contract (`backend/docs/API_CONTRACT.md`)](backend/docs/API_CONTRACT.md)
+NEXORA is still under active development.
 
-## License
+### LLM Latency
+
+Quiz generation can take approximately:
+
+```text
+~28 seconds
+```
+
+depending on hardware and workload.
+
+### Hardware Requirements
+
+Local Qwen inference benefits from a dedicated NVIDIA GPU.
+
+The current tested configuration is:
+
+```text
+RTX 4050 — 6 GB VRAM
+```
+
+### OCR
+
+OCR quality can degrade significantly with handwritten or low-quality source material.
+
+### Model Output
+
+Although structured output validation is implemented, the LLM can occasionally produce invalid structures or incorrect source identifiers.
+
+A validation and retry mechanism is therefore used.
+
+### Concurrency
+
+The current local model setup is not intended for heavy concurrent inference.
+
+Multiple simultaneous generation requests may exceed available VRAM.
+
+### Frontend
+
+The Flutter application is actively being developed and should not yet be considered a finished production application.
+
+---
+
+#
+
+---
+
+# Development Philosophy
+
+NEXORA is intentionally not designed as another generic AI chatbot.
+
+The core philosophy is:
+
+```text
+User Material
+     ↓
+Reliable Retrieval
+     ↓
+Evidence
+     ↓
+Grounded Reasoning
+     ↓
+Useful Learning
+```
+
+The LLM is a reasoning and generation component.
+
+It is not the knowledge database.
+
+This distinction is fundamental to the architecture.
+
+---
+
+# Future Direction
+
+Potential future improvements include:
+
+* Better multimodal document understanding
+* Improved handwriting OCR
+* More advanced retrieval strategies
+* Better chunking algorithms
+* Additional study modes
+* Spaced repetition
+* Flashcards
+* More detailed learning analytics
+* Improved personalization
+* More efficient local inference
+* Expanded document support
+
+These features are intentionally secondary to establishing a reliable Core Brain and a solid Flutter study experience.
+
+---
+
+# Documentation
+
+Detailed backend documentation is available in:
+
+```text
+backend/docs/
+```
+
+Important documents include:
+
+```text
+backend/docs/doc.md
+backend/docs/implement.md
+backend/docs/API_CONTRACT.md
+```
+
+---
+
+# Project Goal
+
+NEXORA aims to become a study environment where students can bring their own material and interact with it through an AI system that is:
+
+* **Grounded**
+* **Traceable**
+* **Personalized**
+* **Deterministic where appropriate**
+* **Local-first for model inference**
+* **Cross-platform**
+* **Focused on actual learning rather than generic conversation**
+
+---
+
+# License
+
 No license has currently been specified for this repository.
